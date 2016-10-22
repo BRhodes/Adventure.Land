@@ -34,6 +34,8 @@ function Main() {
 	//show_json(get_targeted_monster());
 	//show_json(character);
 
+		get_socket().emit("respawn");
+		return true;
     }
 	  //return;
 	  //return;
@@ -63,18 +65,18 @@ function Main() {
   //   if (upgradeEquip("coat", "chest", 7, true, 100000)) return;
   //   if (upgradeEquip("gloves", "gloves", 7, true, 100000)) return;
   //   if (upgradeEquip("pants", "pants", 7, true, 100000)) return;
-  //   if (upgradeAccessory("wbook0", 0, 50000)) return;
-	// if (upgradeAccessory("wbook0", 1, 50000)) return;
+     if (upgradeAccessory("wbook0", 0, 50000)) return;
+	 if (upgradeAccessory("wbook0", 1, 50000)) return;
 	// if (upgradeAccessory("wbook0", 2, 50000)) return;
-  //   if (upgradeAccessory("intamulet", 0, 50000)) return;
-  //   if (upgradeAccessory("intamulet", 1, 50000)) return;
-  //   if (upgradeAccessory("dexamulet", 0, 50000)) return;
-  //   if (upgradeAccessory("stramulet", 0, 50000)) return;
-  //   if (upgradeAccessory("hpamulet", 0, 50000)) return;
-  //   if (upgradeAccessory("hpamulet", 1, 50000)) return;
-  //   if (upgradeAccessory("hpbelt", 0, 50000)) return;
-  //   if (upgradeAccessory("hpbelt", 1, 50000)) return;
-  //   if (upgradeAccessory("ringsj", 0, 50000)) return;
+     if (upgradeAccessory("intamulet", 0, 50000)) return;
+     if (upgradeAccessory("intamulet", 1, 50000)) return;
+     if (upgradeAccessory("dexamulet", 0, 50000)) return;
+     if (upgradeAccessory("stramulet", 0, 50000)) return;
+     if (upgradeAccessory("hpamulet", 0, 50000)) return;
+     if (upgradeAccessory("hpamulet", 1, 50000)) return;
+     if (upgradeAccessory("hpbelt", 0, 50000)) return;
+     if (upgradeAccessory("hpbelt", 1, 50000)) return;
+     if (upgradeAccessory("ringsj", 0, 50000)) return;
 
     if (exchangeItems()) return;
 
@@ -184,7 +186,7 @@ function Main() {
         target = GetTarget();
 	  } else {
         target=get_target_of(get_player("Vehnato"));
-		if (!target || (target.target != "Vehnato" && !goBeforeAggro) && target.mtype == "gscorpion")
+		if (!target || (target.target != "Vehnato" && !goBeforeAggro && target.mtype != "gscorpion"))
 			target=undefined;
 
       }
@@ -385,8 +387,6 @@ function upgradeEquip(itemName, equipSlot, level, buyable, goldStop, args) {
     }
 
     //upgrade the inv
-    var cat;
-    cat[50] = 1
     upgrade(invSlot, scrollSlot);
     return true;
   }
@@ -434,9 +434,9 @@ function PartyInvite(characterName) {
 
 function PartyManagement() {
 	if (character.name == partyLeader) {
-		if (PartyInvite("Vehn")
+		if (PartyInvite("Vehnato")
 		   ||PartyInvite("Vehnifer")
-		   ||PartyInvite("Vehnato")
+		   ||PartyInvite("Vehn")
 		   ||PartyInvite("Valazi")
 		   ||PartyInvite("Dinasis")) return true;
 	} else {
