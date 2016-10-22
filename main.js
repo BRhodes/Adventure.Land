@@ -14,16 +14,16 @@ var partyLeader=party1;
 
 var attack_mode=true;
 var ranOnce=false;
-var bossMode=false;
-var goBeforeAggro=true;
+var bossMode=true;
+var goBeforeAggro=false;
 var controlled=false;
 var buyList;
 var sellList;
 var itemUpgrade;
 var runDelay = 1000/10;
 
-setInterval(
-  function() {
+setInterval(Main, runDelay);
+function Main() {
 
     if (!ranOnce) {
     ranOnce = true
@@ -31,8 +31,9 @@ setInterval(
 	//set_message({});
     CreateBuyList();
 		CreateSellList();
-		//show_json(get_targeted_monster());
+	//show_json(get_targeted_monster());
 	//show_json(character);
+
     }
 	  //return;
 	  //return;
@@ -40,39 +41,40 @@ setInterval(
     //return;
 
     if (Trade()) return;
+	//return;
 	if (PartyManagement()) return;
 
 
-    if (character.ctype == "mage") {
-      if (upgradeEquip("staff", "mainhand", 10, true, 10000000)) return;
-    } else if (character.ctype == "priest") {
-      if (upgradeEquip("staff", "mainhand", 10, true, 10000000)) return;
-    } else if (character.ctype == "rogue") {
-      if (upgradeEquip("claw", "mainhand", 10, true, 10000000)) return;
-    } else if (character.ctype == "warrior") {
-      if (upgradeEquip("blade", "mainhand", 10, true, 10000000)) return;
-      if (upgradeEquip("phelmet", "helmet", 7, true, 100000, {statLevel: 0, rareLevel: 0})) return;
-    } else if (character.ctype == "ranger") {
-      if (upgradeEquip("bow", "mainhand", 10, true, 10000000)) return;
-    }
-
-    //if (upgradeEquip("helmet", "helmet", 7, true, 100000)) return;
-    if (upgradeEquip("shoes", "shoes", 7, true, 100000)) return;
-    if (upgradeEquip("coat", "chest", 7, true, 100000)) return;
-    if (upgradeEquip("gloves", "gloves", 7, true, 100000)) return;
-    if (upgradeEquip("pants", "pants", 7, true, 100000)) return;
-    if (upgradeAccessory("wbook0", 0, 50000)) return;
-	if (upgradeAccessory("wbook0", 1, 50000)) return;
-	if (upgradeAccessory("wbook0", 2, 50000)) return;
-    if (upgradeAccessory("intamulet", 0, 50000)) return;
-    if (upgradeAccessory("intamulet", 1, 50000)) return;
-    if (upgradeAccessory("dexamulet", 0, 50000)) return;
-    if (upgradeAccessory("stramulet", 0, 50000)) return;
-    if (upgradeAccessory("hpamulet", 0, 50000)) return;
-    if (upgradeAccessory("hpamulet", 1, 50000)) return;
-    if (upgradeAccessory("hpbelt", 0, 50000)) return;
-    if (upgradeAccessory("hpbelt", 1, 50000)) return;
-    if (upgradeAccessory("ringsj", 0, 50000)) return;
+  //   if (character.ctype == "mage") {
+  //     if (upgradeEquip("staff", "mainhand", 10, true, 10000000)) return;
+  //   } else if (character.ctype == "priest") {
+  //     if (upgradeEquip("staff", "mainhand", 10, true, 10000000)) return;
+  //   } else if (character.ctype == "rogue") {
+  //     if (upgradeEquip("claw", "mainhand", 10, true, 10000000)) return;
+  //   } else if (character.ctype == "warrior") {
+  //     if (upgradeEquip("blade", "mainhand", 10, true, 10000000)) return;
+  //     if (upgradeEquip("phelmet", "helmet", 7, true, 100000, {statLevel: 0, rareLevel: 0})) return;
+  //   } else if (character.ctype == "ranger") {
+  //     if (upgradeEquip("bow", "mainhand", 10, true, 10000000)) return;
+  //   }
+  //
+  //   //if (upgradeEquip("helmet", "helmet", 7, true, 100000)) return;
+  //   if (upgradeEquip("shoes", "shoes", 7, true, 100000)) return;
+  //   if (upgradeEquip("coat", "chest", 7, true, 100000)) return;
+  //   if (upgradeEquip("gloves", "gloves", 7, true, 100000)) return;
+  //   if (upgradeEquip("pants", "pants", 7, true, 100000)) return;
+  //   if (upgradeAccessory("wbook0", 0, 50000)) return;
+	// if (upgradeAccessory("wbook0", 1, 50000)) return;
+	// if (upgradeAccessory("wbook0", 2, 50000)) return;
+  //   if (upgradeAccessory("intamulet", 0, 50000)) return;
+  //   if (upgradeAccessory("intamulet", 1, 50000)) return;
+  //   if (upgradeAccessory("dexamulet", 0, 50000)) return;
+  //   if (upgradeAccessory("stramulet", 0, 50000)) return;
+  //   if (upgradeAccessory("hpamulet", 0, 50000)) return;
+  //   if (upgradeAccessory("hpamulet", 1, 50000)) return;
+  //   if (upgradeAccessory("hpbelt", 0, 50000)) return;
+  //   if (upgradeAccessory("hpbelt", 1, 50000)) return;
+  //   if (upgradeAccessory("ringsj", 0, 50000)) return;
 
     if (exchangeItems()) return;
 
@@ -158,11 +160,11 @@ setInterval(
       return aheal(char);
     }
     var heal_party=function(){
-      if (healName("Vehnifer")
-          ||  healName("Vehn")
+      if (healName("Vehnato")
+          ||  healName("Vehnifer")
           ||  healName("Dinasis")
           ||  healName("Valazi")
-          ||  healName("Vehnato")) return true;
+          ||  healName("Vehn")) return true;
     };
 
     use_hp_or_mp();
@@ -182,7 +184,7 @@ setInterval(
         target = GetTarget();
 	  } else {
         target=get_target_of(get_player("Vehnato"));
-		if (!target || (target.target != "Vehnato" && !goBeforeAggro))
+		if (!target || (target.target != "Vehnato" && !goBeforeAggro) && target.mtype == "gscorpion")
 			target=undefined;
 
       }
@@ -208,7 +210,7 @@ setInterval(
       attack(target);
     }
 
-}, runDelay);
+}
 
 
 
@@ -480,6 +482,8 @@ function GetNearestMonster(args)
 function GetTarget() {
   //target=GetNearestMonster({min_xp:100,max_att:100});
   var target;
+  if (!target) target=GetNearestMonster({mtype: "mrpumpkin"});
+  if (!target) target=GetNearestMonster({mtype: "gscorpion"});
   if (!target && bossMode) target=GetNearestMonster({mtype: "phoenix"});
   if (!target && bossMode) target=GetNearestMonster({mtype: "dknight2"});
   if (!target) target=GetNearestMonster({mtype: "osnake"});
@@ -508,6 +512,7 @@ function CreateBuyList() {
 	  buyList.hpamulet= true;
 	  buyList.hpbelt = true;
 	  buyList.phelmet = true;
+	  buyList.shield = true;
   } else if (character.ctype == "ranger") {
 	  buyList.dexamulet= true;
   }
@@ -524,6 +529,7 @@ function CreateSellList() {
 	  sellList.hpamulet = true;
 	  sellList.hpbelt = true;
 	  sellList.phelmet = true;
+	sellList.shield = true;
   }
 	if (character.ctype != "ranger") {
 	  sellList.dexamulet= true;
