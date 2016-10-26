@@ -6,6 +6,8 @@ function Main() {
 
   if (!ranOnce) {
     ranOnce = true;
+    InitThetaStar();
+    TSMove(0,0);
     //CreateBuyList();
 		//CreateSellList();
     Respawn();

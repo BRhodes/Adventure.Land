@@ -27,7 +27,7 @@ function Tag() {
   		if(c_dist<min_d) min_d=c_dist,target=current;
   	}
     if (Awake(Tag.Follow) && !in_attack_range(target)) {
-      Follow(target, character.range);
+      //Follow(target, character.range);
       Sleep(Tag.Follow, 100);
     }
 
