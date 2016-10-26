@@ -7,13 +7,21 @@ function InitTime() {
 
 // Run the function, pause execution if needed
 function Run(func) {
-  if (!func.sleep || func.sleep <= currentTime)
+  if (Awake(func))
     func();
 }
 
-// Timeout a function for time miliseconds
-function Sleep(func, time) {
-  func.sleep = currentTime + time;
+// Timeout an object for time miliseconds
+function Sleep(obj, time) {
+  if (!obj)
+    obj = {};
+  obj.sleep = currentTime + time;
+}
+
+// Check to see if object is timed out
+function Awake(obj) {
+  if (!obj || !obj.sleep || obj.sleep <= currentTime) return true;
+  return false;
 }
 
 // Respawn the character if it's dead
@@ -47,7 +55,7 @@ function UsePotion() {
   return true;
 }
 
-// Always through an error- makes break points easy to set
+// Always throw an error- makes break points easy to set
 function DebugException() {
   var cat;
   cat[50] = "error";
@@ -61,33 +69,37 @@ function Loot() {
   }
 }
 
-// function find_item_level(itemName, level, start) {
-//   var i;
+function find_item_level(itemName, level, start) {
+  var i;
+
+  for (i = start; i < 42; i++) {
+    if (character.items[i] != undefined &&
+        character.items[i].name == itemName &&
+        (character.items[i].level == level
+           //|| (!character.items[i].level && level == 0)
+         )) {
+          return i;
+        }
+  }
+  return -1;
+}
 //
-//   for (i = start; i < 42; i++) {
-//     if (character.items[i] != undefined &&
-//         character.items[i].name == itemName &&
-//         (character.items[i].level == level
-//            //|| (!character.items[i].level && level == 0)
-//          )) {
-//           return i;
-//         }
-//   }
-//   return -1;
-// }
-//
-// function FindItem(itemName) {
-//   var i;
-//
-//   for (i = 0; i < 42; i++) {
-//     if (character.items[i] != undefined &&
-//         character.items[i].name == itemName) {
-//           return i;
-//         }
-//   }
-//   return -1;
-// }
-//
-// function find_item(itemName) {
-//   return FindItem(itemName);
-// }
+function find_item(itemName) {
+  var i;
+
+  for (i = 0; i < 42; i++) {
+    if (character.items[i] != undefined &&
+        character.items[i].name == itemName) {
+          return i;
+        }
+  }
+  return -1;
+}
+
+
+function InfoGraphic() {
+  parent.maincode.width=parent.bottomrightcorner.width;
+  parent.maincode.style.bottom = "273px";
+  parent.maincode.height=312+12;
+  set_message("header<table><tr><td width=\"50%\">XPR: ###</td><td>TTL: HH:MM:DD</td></tr><tr><td>small but</td><td>this will be long</td></tr>");
+}

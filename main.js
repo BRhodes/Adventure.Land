@@ -14,9 +14,10 @@ function Main() {
 		return;
   }
 
-
+  Run(Upgrade);
   Run(UsePotion);
   Run(Loot);
+  Run(Tag);
   //use_hp_or_mp();
   //loot();
   //return;
