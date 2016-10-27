@@ -1,3 +1,4 @@
+(function() {
 //var parties =[["Vehnato", "Vehnifer", "Valazi"], ["Vehnjamin", "Vehnifer", "Valazi"]];
 // var party;
 // var party2="Vehn";
@@ -44,8 +45,10 @@ function Main() {
 
   if (!ranOnce) {
     ranOnce = true;
-    InitThetaStar();
-    TSMove(0,0);
+    initialize_graph(character.map);
+    go_to_point(new Point("halloween", 0, 0));
+    //InitThetaStar();
+    //TSMove(0,0);
     //CreateBuyList();
 		//CreateSellList();
     Respawn();
@@ -233,6 +236,8 @@ function Tag() {
   	// target: Only return monsters that target this "name" or player object
   	// no_target: Only pick monsters that don't have any target
   	var min_d=999999,target=null;
+	var tagged = 0;
+	var tagmin_d=999999,tagtarget=null;
   	//if(!args) args={};
   	//if(args && args.target && args.target.name) args.target=args.target.name;
 
@@ -246,11 +251,17 @@ function Tag() {
       //if(args.mtype && current.mtype != args.mtype) continue;
   		//if(args.target&& current.target!=args.target) continue;
   		if(current.target && character.max_hp - character.hp < 300) {
+			var tagc_dist=parent.distance(character,current);
+  			if(tagc_dist<tagmin_d) tagmin_d=tagc_dist,tagtarget=current;
+			tagged = tagged + 1;
         continue;
       }
+
   		var c_dist=parent.distance(character,current);
   		if(c_dist<min_d) min_d=c_dist,target=current;
   	}
+	if (tagged > 3) target=tagtarget;
+
     if (Awake(Tag.Follow) && !in_attack_range(target)) {
       //Follow(target, character.range);
       Sleep(Tag.Follow, 100);
@@ -567,170 +578,322 @@ function Upgrade() {
 //   var sock = get_socket();
 //   sock.emit("equip", {num: invSlot});
 // }
-function Box(x1, y1, x2, y2) {
-    this.x1 = x1;
-    this.y1 = y1;
-    this.x2 = x2;
-    this.y2 = y2;
-}
+const GRAPH_RESOLUTION = 10;
 
-Box.prototype.square = function() {
-    let h_center = (this.x1 + this.x2) / 2;
-    let v_center = (this.y1 + this.y2) / 2;
+class Box {
+    constructor(x1, y1, x2, y2) {
+        this.x1 = x1;
+        this.y1 = y1;
+        this.x2 = x2;
+        this.y2 = y2;
+    }
 
-    let width = this.width();
-    let height = this.height();
-    let difference = Math.abs(height - width) / 2;
+    square() {
+        let width = this.width();
+        let height = this.height();
+        let difference = Math.abs(height - width) / 2;
 
-    if (width < height) {
-        this.x1 -= difference;
-        this.x2 += difference;
-    } else {
-        this.y1 -= difference;
-        this.y2 += difference;
+        if (width < height) {
+            this.x1 -= difference;
+            this.x2 += difference;
+        } else {
+            this.y1 -= difference;
+            this.y2 += difference;
+        }
+    }
+
+    width() {
+        return this.x2 - this.x1;
+    }
+
+    height() {
+        return this.y2 - this.y1;
+    }
+
+    contains(x, y) {
+        return (this.x1 < x && x < this.x2 &&
+                this.y1 < y && y < this.y2);
+    }
+
+    intersects(box) {
+        return (this.x1 <= box.x2 &&
+                box.x1 <= this.x2 &&
+                this.y1 <= box.y2 &&
+                box.y1 <= this.y2);
+    }
+
+    intersects_segment(ox, oy, invdx, invdy) {
+        let t1 = (this.x1 - ox) * invdx;
+        let t2 = (this.x2 - ox) * invdx;
+        let t3 = (this.y1 - oy) * invdy;
+        let t4 = (this.y2 - oy) * invdy;
+
+        let tmin = Math.max(Math.min(t1, t2), Math.min(t3, t4));
+        let tmax = Math.min(Math.max(t1, t2), Math.max(t3, t4));
+
+        if (tmax < 0) return false;
+        if (tmax > 1 || tmin > tmax) return false;
+
+        return true;
     }
 }
 
-Box.prototype.width = function() {
-    return this.x2 - this.x1;
-}
 
-Box.prototype.height = function() {
-    return this.y2 - this.y1;
-}
+class NodeTree {
+    constructor(region, obstacles, root, level) {
+        if (!level) {
+            this.level = Math.ceil(Math.log2(region.width() / GRAPH_RESOLUTION));
+        } else {
+            this.level = level;
+        }
 
-Box.prototype.contains = function(x, y) {
-    return this.x1 < x && x < this.x2 &&
-           this.y1 < y && y < this.y2;
-}
+        if (root) {
+            this.root = root;
+        } else {
+            this.root = this;
+        }
 
-Box.prototype.intersects = function(box) {
-    return (this.x1 <= box.x2 &&
-            box.x1 <= this.x2 &&
-            this.y1 <= box.y2 &&
-            box.y1 <= this.y2)
-}
+        this.region = region;
 
-Box.prototype.intersects_segment = function(start, end) {
-    let dx = end.x - start.x;
-    let dy = end.y - start.y;
+        this.x = (region.x1 + region.x2) / 2;
+        this.y = (region.y1 + region.y2) / 2;
 
-    let len = Math.sqrt(dx * dx + dy * dy);
+        this.obstacles = obstacles;
 
-    let ndx = 1 / dx;
-    let ndy = 1 / dy;
+        this.crossable = true;
+        this.is_leaf = false;
 
-    let t1 = (this.x1 - start.x) * ndx;
-    let t2 = (this.x2 - start.x) * ndx;
-    let t3 = (this.y1 - start.y) * ndy;
-    let t4 = (this.y2 - start.y) * ndy;
+        if (this.obstacles.length == 0) {
+            this.is_leaf = true;
+        }
 
-    let tmin = Math.max(Math.min(t1, t2), Math.min(t3, t4));
-    let tmax = Math.min(Math.max(t1, t2), Math.max(t3, t4));
+        if (region.width() <= GRAPH_RESOLUTION) {
+            this.is_leaf = true;
+            this.crossable = obstacles.length == 0;
+        }
 
-    if (tmax < 0) return false;
-    if (tmin > 1) return false;
+        this.quads = [];
+        this.neighbors = null;
 
-    return true;
-}
-var GRAPH_RESOLUTION;
-var min_x;
-var max_x;
-var min_y;
-var max_y;
-var obstacles;
-var map_region;
-var _map;
+        this.list_id = 0;
+        this.heuristic = 0;
 
+        if (!this.is_leaf) {
+            this.subdivide();
+        }
+    }
 
-function InitThetaStar() {
-  //other inits
-  GRAPH_RESOLUTION = 10;
+    get_quad(x, y) {
+        if (x < this.x && y < this.y) return this.quads[0];
+        else if (x >= this.x && y < this.y) return this.quads[1];
+        else if (x < this.x && y >= this.y) return this.quads[2];
+        return this.quads[3];
+    }
 
-  min_x = Infinity;
-  max_x = -Infinity;
-  min_y = Infinity;
-  max_y = -Infinity;
+    subdivide() {
+        let l = this.region.x1;
+        let r = this.region.x2;
+        let t = this.region.y1;
+        let b = this.region.y2;
 
-  obstacles = [];
+        let x = this.x;
+        let y = this.y;
 
-  // mapping data Init
-  for (let line of parent.M.x_lines) {
-      min_x = Math.min(min_x, line[0]);
-      max_x = Math.max(max_x, line[0]);
-      obstacles.push(new Box(line[0] - 3, Math.min(line[1], line[2]) - 3, line[0] + 3, Math.max(line[1], line[2]) + 7));
-  }
+        let subregions = [
+            new Box(l, t, x, y),
+            new Box(x, t, r, y),
+            new Box(l, y, x, b),
+            new Box(x, y, r, b),
+        ];
 
-  for (let line of parent.M.y_lines) {
-      min_y = Math.min(min_y, line[0]);
-      max_y = Math.max(max_y, line[0]);
-      obstacles.push(new Box(Math.min(line[1], line[2]) - 3, line[0] - 3, Math.max(line[1], line[2]) + 3, line[0] + 7));
-  }
+        let obstacles = this.obstacles;
+        for (let i = 0; i < subregions.length; i++) {
+            let subregion = subregions[i];
+            let subregion_obstacles = [];
 
-  map_region = new Box(min_x, min_y, max_x, max_y);
-  map_region.square();
+            for (let j = 0; j < obstacles.length; j++) {
+                let obstacle = obstacles[j];
+                if (subregion.intersects(obstacle)) {
+                    subregion_obstacles.push(obstacle);
+                }
+            }
 
-  _map = new NodeTree(map_region, obstacles);
-}
+            this.quads[i] = new NodeTree(subregion, subregion_obstacles, this.root);
+        }
+    }
 
-// part of the "move"
-function find_path(source, target) {
-    let closed = new Set();
-    let open = new Set();
+    get(x, y) {
+        if (!this.region.contains(x, y)) return null;
+        if (this.is_leaf) return this;
+        return this.get_quad(x, y).get(x, y);
+    }
 
-    let traveled = new Map();
-    let heuristic = new Map();
-    let parents = new Map();
+    get_neighbors() {
+        if (!this.is_leaf) throw new Error('Tried getting neighbors of non-leaf node');
+        if (this.neighbors) return this.neighbors;
 
-    open.add(source);
+        this.neighbors = [];
 
-    traveled.set(source, 0);
-    heuristic.set(source, distance(source, target));
-    parents.set(source, source);
+        let left = this.region.x1;
+        let right = this.region.x2;
+        let top = this.region.y1;
+        let bottom = this.region.y2;
 
-    while (open.size) {
-        let current = null;
-        let min_heuristic = Infinity;
+        let min_size = this.region.width() * (2 ** -this.level);
+        let num_neighbors = 2 ** this.level;
 
-        for (let node of open) {
-            let node_heuristic = heuristic.get(node);
+        let neighbor_set = new Set();
 
-            if (node_heuristic < min_heuristic) {
-                min_heuristic = node_heuristic;
-                current = node;
+        // Top and bottom (and corners).
+        for (let x = -(num_neighbors + 1); x <= (num_neighbors + 1); x += 2) {
+            let real_x = this.x + min_size * (x / 2);
+
+            let neighbor = this.root.get(real_x, top - min_size / 2);
+            if (neighbor && neighbor.crossable) neighbor_set.add(neighbor);
+
+            neighbor = this.root.get(real_x, bottom + min_size / 2);
+            if (neighbor && neighbor.crossable) neighbor_set.add(neighbor);
+        }
+
+        // Left and right.
+        for (let y = -(num_neighbors - 1); y <= (num_neighbors - 1); y += 2) {
+            let real_y = this.y + min_size * (y / 2);
+
+            let neighbor = this.root.get(left - min_size / 2, real_y);
+            if (neighbor && neighbor.crossable) neighbor_set.add(neighbor);
+
+            neighbor = this.root.get(right + min_size / 2, real_y);
+            if (neighbor && neighbor.crossable) neighbor_set.add(neighbor);
+        }
+
+        this.neighbors = [...neighbor_set];
+
+        return this.neighbors;
+    }
+
+    get_containing(a, b) {
+        if (this.is_leaf) return this;
+
+        let a_quad = this.get_quad(a.x, a.y);
+        let b_quad = this.get_quad(b.x, b.y);
+
+        if (a_quad == b_quad) return a_quad.get_containing(a, b);
+
+        return this;
+    }
+
+    has_sight(node) {
+        let ancestor = this.root.get_containing(this, node);
+        let obstacles = ancestor.obstacles;
+
+        let min_x = Math.min(node.x, this.x);
+        let max_x = Math.max(node.x, this.x);
+        let min_y = Math.min(node.y, this.y);
+        let max_y = Math.max(node.y, this.y);
+
+        let invdx = 1 / (node.x - this.x);
+        let invdy = 1 / (node.y - this.y);
+
+        for (let i = 0; i < obstacles.length; i++) {
+            let obstacle = obstacles[i];
+            if (max_x >= obstacle.x1 && min_x <= obstacle.x2 &&
+                max_y >= obstacle.y1 && min_y <= obstacle.y2 &&
+                obstacle.intersects_segment(this.x, this.y, invdx, invdy)) {
+                return false;
             }
         }
+
+        return true;
+    }
+}
+
+class VirtualNode extends NodeTree {
+    constructor(parent, x, y) {
+        super(parent.region, [], parent.root, -1);
+
+        this.x = x;
+        this.y = y;
+
+        this.neighbors = [parent];
+
+        this.parent = parent;
+        parent.get_neighbors().push(this);
+    }
+
+    destroy() {
+        let parent_neighbors = this.parent.get_neighbors();
+        parent_neighbors.splice(parent_neighbors.indexOf(this), 1);
+    }
+}
+
+// function distance(a, b) {
+//     let x_dist = b.x - a.x;
+//     let y_dist = b.y - a.y;
+//     return Math.sqrt(x_dist * x_dist + y_dist * y_dist);
+// }
+
+let list_id = 0;
+function find_path(source, target) {
+    /* eslint func-names:0, prefer-arrow-callback:0 */
+    list_id += 2;
+    let closed_id = list_id - 1;
+    let open_id = list_id;
+
+    let open = new Heap(function (a, b) { return a.heuristic - b.heuristic; });
+
+    let traveled = new Map();
+    let parents = new Map();
+
+    traveled.set(source, 0);
+    parents.set(source, source);
+
+    source.heuristic = distance(source, target);
+    open.push(source);
+    source.list_id = open_id;
+
+    while (open.size()) {
+        let current = open.pop();
 
         if (current == target) {
             break;
         }
 
-        open.delete(current);
-        closed.add(current);
+        current.list_id = closed_id;
 
-        for (let neighbor of current.get_neighbors()) {
-            if (closed.has(neighbor)) continue;
+        let neighbors = current.get_neighbors();
+        for (let i = 0; i < neighbors.length; i++) {
+            let neighbor = neighbors[i];
 
-            let old_path = traveled.get(neighbor);
-            if (!open.has(neighbor)) {
-                old_path = Infinity;
-                open.add(neighbor);
-            }
+            if (neighbor.list_id == closed_id) continue;
+
+            let old_path = traveled.get(neighbor) || Infinity;
+            let replaced_path = null;
 
             let parent = parents.get(current);
             if (parent.has_sight(neighbor)) {
                 let parent_path = traveled.get(parent) + distance(parent, neighbor);
                 if (parent_path < old_path) {
-                    parents.set(neighbor, parent);
                     traveled.set(neighbor, parent_path);
-                    heuristic.set(neighbor, parent_path + distance(neighbor, target));
+                    parents.set(neighbor, parent);
+                    replaced_path = parent_path;
                 }
             } else {
                 let new_path = traveled.get(current) + distance(current, neighbor);
                 if (new_path < old_path) {
-                    parents.set(neighbor, current);
                     traveled.set(neighbor, new_path);
-                    heuristic.set(neighbor, new_path + distance(neighbor, target));
+                    parents.set(neighbor, current);
+                    replaced_path = new_path;
+                }
+            }
+
+            if (replaced_path !== null) {
+                neighbor.heuristic = replaced_path + distance(neighbor, target);
+
+                if (neighbor.list_id == open_id) {
+                    open.updateItem(neighbor);
+                } else {
+                    open.push(neighbor);
+                    neighbor.list_id = open_id;
                 }
             }
         }
@@ -748,164 +911,455 @@ function find_path(source, target) {
     return path;
 }
 
+function initialize_graph(map_name) {
+    let map_data = parent.G.maps[map_name].data;
 
-function TSMove(x, y) {
-  var current_node = _map.get(character.real_x, character.real_y);
-  var target_node = _map.get(x, y);
+    let min_x = Infinity;
+    let max_x = -Infinity;
+    let min_y = Infinity;
+    let max_y = -Infinity;
 
-  var path = find_path(current_node, target_node);
 
-  path.unshift(current_node);
+    let obstacles = [];
 
-  // drawings = [];
-  // for (let i = 0; i < path.length - 1; i++) {
-  //     let n1 = path[i];
-  //     let n2 = path[i + 1];
-  //     let line = draw_line(n1.x, n1.y, n2.x, n2.y, 3);
-  //     drawings.push(line);
-  //     //map.addChild(line);
-  // }
+    for (let line of map_data.x_lines) {
+        min_x = Math.min(min_x, line[0]);
+        max_x = Math.max(max_x, line[0]);
+        obstacles.push(new Box(
+            line[0] - 3,
+            Math.min(line[1], line[2]) - 3,
+            line[0] + 3,
+            Math.max(line[1], line[2]) + 7
+        ));
+    }
 
-  var cur_point = 0;
-  var move_interval = setInterval(() => {
-      if (character.moving) return;
+    for (let line of map_data.y_lines) {
+        min_y = Math.min(min_y, line[0]);
+        max_y = Math.max(max_y, line[0]);
+        obstacles.push(new Box(
+            Math.min(line[1], line[2]) - 3,
+            line[0] - 3,
+            Math.max(line[1], line[2]) + 3,
+            line[0] + 7
+        ));
+    }
 
-      if (cur_point == path.length) {
-          clearInterval(move_interval);
-          drawings.forEach(e => e.destroy());
-          drawings = [];
+    let region = new Box(min_x, min_y, max_x, max_y);
+    region.square();
+
+    return new NodeTree(region, obstacles);
+}
+// Generated by CoffeeScript 1.8.0
+let Heap = (function() {
+  var Heap, defaultCmp, floor, heapify, heappop, heappush, heappushpop, heapreplace, insort, min, nlargest, nsmallest, updateItem, _siftdown, _siftup;
+
+  floor = Math.floor, min = Math.min;
+
+
+  /*
+  Default comparison function to be used
+   */
+
+  defaultCmp = function(x, y) {
+    if (x < y) {
+      return -1;
+    }
+    if (x > y) {
+      return 1;
+    }
+    return 0;
+  };
+
+
+  /*
+  Insert item x in list a, and keep it sorted assuming a is sorted.
+
+  If x is already in a, insert it to the right of the rightmost x.
+
+  Optional args lo (default 0) and hi (default a.length) bound the slice
+  of a to be searched.
+   */
+
+  insort = function(a, x, lo, hi, cmp) {
+    var mid;
+    if (lo == null) {
+      lo = 0;
+    }
+    if (cmp == null) {
+      cmp = defaultCmp;
+    }
+    if (lo < 0) {
+      throw new Error('lo must be non-negative');
+    }
+    if (hi == null) {
+      hi = a.length;
+    }
+    while (lo < hi) {
+      mid = floor((lo + hi) / 2);
+      if (cmp(x, a[mid]) < 0) {
+        hi = mid;
       } else {
-          let node = path[cur_point++];
-          move(node.x, node.y);
+        lo = mid + 1;
       }
-  }, 1000 / 20);
-}
-function NodeTree(region, obstacles, root) {
-    if (root) {
-        this.root = root;
+    }
+    return ([].splice.apply(a, [lo, lo - lo].concat(x)), x);
+  };
+
+
+  /*
+  Push item onto heap, maintaining the heap invariant.
+   */
+
+  heappush = function(array, item, cmp) {
+    if (cmp == null) {
+      cmp = defaultCmp;
+    }
+    array.push(item);
+    return _siftdown(array, 0, array.length - 1, cmp);
+  };
+
+
+  /*
+  Pop the smallest item off the heap, maintaining the heap invariant.
+   */
+
+  heappop = function(array, cmp) {
+    var lastelt, returnitem;
+    if (cmp == null) {
+      cmp = defaultCmp;
+    }
+    lastelt = array.pop();
+    if (array.length) {
+      returnitem = array[0];
+      array[0] = lastelt;
+      _siftup(array, 0, cmp);
     } else {
-        this.root = this;
+      returnitem = lastelt;
     }
+    return returnitem;
+  };
 
-    this.region = region;
 
-    this.x = (region.x1 + region.x2) / 2;
-    this.y = (region.y1 + region.y2) / 2;
+  /*
+  Pop and return the current smallest value, and add the new item.
 
-    this.obstacles = obstacles;
-    this.subdivided = false;
+  This is more efficient than heappop() followed by heappush(), and can be
+  more appropriate when using a fixed size heap. Note that the value
+  returned may be larger than item! That constrains reasonable use of
+  this routine unless written as part of a conditional replacement:
+      if item > array[0]
+        item = heapreplace(array, item)
+   */
 
-    this.is_leaf = false;
-    this.crossable = true;
-
-    if (region.x2 <= min_x || region.x1 >= max_x ||
-        region.y2 <= min_y || region.y1 >= max_y) {
-        this.crossable = false;
+  heapreplace = function(array, item, cmp) {
+    var returnitem;
+    if (cmp == null) {
+      cmp = defaultCmp;
     }
+    returnitem = array[0];
+    array[0] = item;
+    _siftup(array, 0, cmp);
+    return returnitem;
+  };
 
-    if (region.width() <= GRAPH_RESOLUTION) {
-        this.is_leaf = true;
-        this.crossable = obstacles.length == 0;
+
+  /*
+  Fast version of a heappush followed by a heappop.
+   */
+
+  heappushpop = function(array, item, cmp) {
+    var _ref;
+    if (cmp == null) {
+      cmp = defaultCmp;
     }
+    if (array.length && cmp(array[0], item) < 0) {
+      _ref = [array[0], item], item = _ref[0], array[0] = _ref[1];
+      _siftup(array, 0, cmp);
+    }
+    return item;
+  };
 
-    this.quads = [];
-    this.nodes = [];
 
-    this.neighbors = null;
-}
+  /*
+  Transform list into a heap, in-place, in O(array.length) time.
+   */
 
-NodeTree.prototype.get_quad = function(x, y) {
-    if (x < this.x && y < this.y) return this.quads[0];
-    if (x > this.x && y < this.y) return this.quads[1];
-    if (x < this.x && y > this.y) return this.quads[2];
-    if (x > this.x && y > this.y) return this.quads[3];
-}
+  heapify = function(array, cmp) {
+    var i, _i, _j, _len, _ref, _ref1, _results, _results1;
+    if (cmp == null) {
+      cmp = defaultCmp;
+    }
+    _ref1 = (function() {
+      _results1 = [];
+      for (var _j = 0, _ref = floor(array.length / 2); 0 <= _ref ? _j < _ref : _j > _ref; 0 <= _ref ? _j++ : _j--){ _results1.push(_j); }
+      return _results1;
+    }).apply(this).reverse();
+    _results = [];
+    for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+      i = _ref1[_i];
+      _results.push(_siftup(array, i, cmp));
+    }
+    return _results;
+  };
 
-NodeTree.prototype.subdivide = function() {
-    this.subdivided = true;
 
-    let l = this.region.x1;
-    let r = this.region.x2;
-    let t = this.region.y1;
-    let b = this.region.y2;
+  /*
+  Update the position of the given item in the heap.
+  This function should be called every time the item is being modified.
+   */
 
-    let x = this.x;
-    let y = this.y;
+  updateItem = function(array, item, cmp) {
+    var pos;
+    if (cmp == null) {
+      cmp = defaultCmp;
+    }
+    pos = array.indexOf(item);
+    if (pos === -1) {
+      return;
+    }
+    _siftdown(array, 0, pos, cmp);
+    return _siftup(array, pos, cmp);
+  };
 
-    let subregions = [
-        new Box(l, t, x, y),
-        new Box(x, t, r, y),
-        new Box(l, y, x, b),
-        new Box(x, y, r, b),
-    ];
 
-    for (let i = 0; i < subregions.length; i++) {
-        let subregion = subregions[i];
-        let subregion_obstacles = [];
+  /*
+  Find the n largest elements in a dataset.
+   */
 
-        for (let obstacle of obstacles) {
-            if (subregion.intersects(obstacle)) {
-                subregion_obstacles.push(obstacle);
-            }
+  nlargest = function(array, n, cmp) {
+    var elem, result, _i, _len, _ref;
+    if (cmp == null) {
+      cmp = defaultCmp;
+    }
+    result = array.slice(0, n);
+    if (!result.length) {
+      return result;
+    }
+    heapify(result, cmp);
+    _ref = array.slice(n);
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      elem = _ref[_i];
+      heappushpop(result, elem, cmp);
+    }
+    return result.sort(cmp).reverse();
+  };
+
+
+  /*
+  Find the n smallest elements in a dataset.
+   */
+
+  nsmallest = function(array, n, cmp) {
+    var elem, i, los, result, _i, _j, _len, _ref, _ref1, _results;
+    if (cmp == null) {
+      cmp = defaultCmp;
+    }
+    if (n * 10 <= array.length) {
+      result = array.slice(0, n).sort(cmp);
+      if (!result.length) {
+        return result;
+      }
+      los = result[result.length - 1];
+      _ref = array.slice(n);
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        elem = _ref[_i];
+        if (cmp(elem, los) < 0) {
+          insort(result, elem, 0, null, cmp);
+          result.pop();
+          los = result[result.length - 1];
         }
+      }
+      return result;
+    }
+    heapify(array, cmp);
+    _results = [];
+    for (i = _j = 0, _ref1 = min(n, array.length); 0 <= _ref1 ? _j < _ref1 : _j > _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
+      _results.push(heappop(array, cmp));
+    }
+    return _results;
+  };
 
-        this.quads[i] = new NodeTree(subregion, subregion_obstacles, this.root);
+  _siftdown = function(array, startpos, pos, cmp) {
+    var newitem, parent, parentpos;
+    if (cmp == null) {
+      cmp = defaultCmp;
+    }
+    newitem = array[pos];
+    while (pos > startpos) {
+      parentpos = (pos - 1) >> 1;
+      parent = array[parentpos];
+      if (cmp(newitem, parent) < 0) {
+        array[pos] = parent;
+        pos = parentpos;
+        continue;
+      }
+      break;
+    }
+    return array[pos] = newitem;
+  };
+
+  _siftup = function(array, pos, cmp) {
+    var childpos, endpos, newitem, rightpos, startpos;
+    if (cmp == null) {
+      cmp = defaultCmp;
+    }
+    endpos = array.length;
+    startpos = pos;
+    newitem = array[pos];
+    childpos = 2 * pos + 1;
+    while (childpos < endpos) {
+      rightpos = childpos + 1;
+      if (rightpos < endpos && !(cmp(array[childpos], array[rightpos]) < 0)) {
+        childpos = rightpos;
+      }
+      array[pos] = array[childpos];
+      pos = childpos;
+      childpos = 2 * pos + 1;
+    }
+    array[pos] = newitem;
+    return _siftdown(array, startpos, pos, cmp);
+  };
+
+  Heap = (function() {
+    Heap.push = heappush;
+
+    Heap.pop = heappop;
+
+    Heap.replace = heapreplace;
+
+    Heap.pushpop = heappushpop;
+
+    Heap.heapify = heapify;
+
+    Heap.updateItem = updateItem;
+
+    Heap.nlargest = nlargest;
+
+    Heap.nsmallest = nsmallest;
+
+    function Heap(cmp) {
+      this.cmp = cmp != null ? cmp : defaultCmp;
+      this.nodes = [];
+    }
+
+    Heap.prototype.push = function(x) {
+      return heappush(this.nodes, x, this.cmp);
+    };
+
+    Heap.prototype.pop = function() {
+      return heappop(this.nodes, this.cmp);
+    };
+
+    Heap.prototype.peek = function() {
+      return this.nodes[0];
+    };
+
+    Heap.prototype.contains = function(x) {
+      return this.nodes.indexOf(x) !== -1;
+    };
+
+    Heap.prototype.replace = function(x) {
+      return heapreplace(this.nodes, x, this.cmp);
+    };
+
+    Heap.prototype.pushpop = function(x) {
+      return heappushpop(this.nodes, x, this.cmp);
+    };
+
+    Heap.prototype.heapify = function() {
+      return heapify(this.nodes, this.cmp);
+    };
+
+    Heap.prototype.updateItem = function(x) {
+      return updateItem(this.nodes, x, this.cmp);
+    };
+
+    Heap.prototype.clear = function() {
+      return this.nodes = [];
+    };
+
+    Heap.prototype.empty = function() {
+      return this.nodes.length === 0;
+    };
+
+    Heap.prototype.size = function() {
+      return this.nodes.length;
+    };
+
+    Heap.prototype.clone = function() {
+      var heap;
+      heap = new Heap();
+      heap.nodes = this.nodes.slice(0);
+      return heap;
+    };
+
+    Heap.prototype.toArray = function() {
+      return this.nodes.slice(0);
+    };
+
+    Heap.prototype.insert = Heap.prototype.push;
+
+    Heap.prototype.top = Heap.prototype.peek;
+
+    Heap.prototype.front = Heap.prototype.peek;
+
+    Heap.prototype.has = Heap.prototype.contains;
+
+    Heap.prototype.copy = Heap.prototype.clone;
+
+    return Heap;
+
+  })();
+
+  return Heap;
+})();
+class Point {
+    constructor(map, x, y) {
+        this.x = x;
+        this.y = y;
+        this.map = map;
     }
 }
 
-NodeTree.prototype.get = function(x, y) {
-    if (!this.crossable || this.is_leaf) return this;
-
-    if (!this.subdivided) {
-        this.subdivide();
+const graph_cache = {};
+function go_to_point(point) {
+    if (!graph_cache[point.map]) {
+        //console.time('Initialize Graph');
+        graph_cache[point.map] = initialize_graph(point.map);
+        //console.timeEnd('Initialize Graph');
     }
 
-    return this.get_quad(x, y).get(x, y);
-}
+    let map = graph_cache[point.map];
 
-NodeTree.prototype.get_neighbors = function() {
-    if (!this.is_leaf) throw new Exception('Tried getting neighbors of non-leaf node');
-    if (this.neighbors) return this.neighbors;
+    let current_node = map.get(character.real_x, character.real_y);
+    let target_node = map.get(point.x, point.y);
 
-    this.neighbors = [];
+    let current_virtual = new VirtualNode(current_node, character.real_x, character.real_y);
+    let target_virtual = new VirtualNode(target_node, point.x, point.y);
 
-    let x = this.x;
-    let y = this.y;
-    let width = this.region.width();
-    let height = this.region.height();
+//    console.time('Find path');
+    let path = find_path(current_virtual, target_virtual);
+    //console.timeEnd('Find path');
 
-    for (let i = -1; i <= 1; i++) {
-        for (let j = -1; j <= 1; j++) {
-            if (i == 0 && j == 0) continue;
+    let target = current_virtual;
+    move(target.x, target.y);
 
-            let neighbor = this.root.get(x + width * i, y + height * j);
-            if (neighbor && neighbor.crossable) {
-                this.neighbors.push(neighbor);
-            }
-        }
+    while (path.length) {
+        //await sleep(1000 / 20);
+
+        if (character.moving) continue;
+
+        let pos = new Vec(character);
+
+        // Unexpected movement (probably by the player), so cancel
+        // the path movement.
+        if (!pos.equals(target)) break;
+
+        target = path.shift();
+        move(target.x, target.y);
     }
 
-    return this.neighbors;
+    current_virtual.destroy();
+    target_virtual.destroy();
 }
-
-NodeTree.prototype.get_containing = function(a, b) {
-    let a_quad = this.get_quad(a.x, a.y);
-    let b_quad = this.get_quad(b.x, b.y);
-
-    if (a_quad == b_quad) return a_quad.get_containing(a, b);
-
-    return this;
-}
-
-NodeTree.prototype.has_sight = function(node) {
-  return false;
-    let ancestor = this.root.get_containing(this, node);
-
-    for (let obstacle of ancestor.obstacles) {
-        if (obstacle.intersects_segment(this, node)) {
-            return false;
-        }
-    }
-
-    return true;
-}
+}())
