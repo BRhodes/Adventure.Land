@@ -8,6 +8,8 @@ function Tag() {
   	// target: Only return monsters that target this "name" or player object
   	// no_target: Only pick monsters that don't have any target
   	var min_d=999999,target=null;
+	var tagged = 0;
+	var tagmin_d=999999,tagtarget=null;
   	//if(!args) args={};
   	//if(args && args.target && args.target.name) args.target=args.target.name;
 
@@ -21,11 +23,17 @@ function Tag() {
       //if(args.mtype && current.mtype != args.mtype) continue;
   		//if(args.target&& current.target!=args.target) continue;
   		if(current.target && character.max_hp - character.hp < 300) {
+			var tagc_dist=parent.distance(character,current);
+  			if(tagc_dist<tagmin_d) tagmin_d=tagc_dist,tagtarget=current;
+			tagged = tagged + 1;
         continue;
       }
+
   		var c_dist=parent.distance(character,current);
   		if(c_dist<min_d) min_d=c_dist,target=current;
   	}
+	if (tagged > 3) target=tagtarget;
+
     if (Awake(Tag.Follow) && !in_attack_range(target)) {
       //Follow(target, character.range);
       Sleep(Tag.Follow, 100);

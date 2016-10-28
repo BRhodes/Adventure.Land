@@ -6,8 +6,10 @@ function Main() {
 
   if (!ranOnce) {
     ranOnce = true;
-    InitThetaStar();
-    TSMove(0,0);
+    initialize_graph(character.map);
+    go_to_point(new Point("halloween", 0, 0));
+    //InitThetaStar();
+    //TSMove(0,0);
     //CreateBuyList();
 		//CreateSellList();
     Respawn();
