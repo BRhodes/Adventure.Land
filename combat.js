@@ -35,7 +35,7 @@ function Tag() {
 	if (tagged > 3) target=tagtarget;
 
     if (Awake(Tag.Follow) && !in_attack_range(target)) {
-      //Follow(target, character.range);
+      Follow(target, character.range);
       Sleep(Tag.Follow, 100);
     }
 

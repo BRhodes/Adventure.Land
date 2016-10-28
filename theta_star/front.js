@@ -1,49 +1,60 @@
-class Point {
-    constructor(map, x, y) {
-        this.x = x;
-        this.y = y;
-        this.map = map;
-    }
-}
-
 const graph_cache = {};
-function go_to_point(point) {
-    if (!graph_cache[point.map]) {
-        //console.time('Initialize Graph');
-        graph_cache[point.map] = initialize_graph(point.map);
-        //console.timeEnd('Initialize Graph');
+
+// class Point {
+//     constructor(map, x, y) {
+//         this.x = x;
+//         this.y = y;
+//         this.map = map;
+//     }
+// }
+
+function SmartMove(x, y, mapName) {
+  Move.done = false;
+  Move.dest_x = x;
+  Move.dest_y = y;
+
+  if (Move.currentPath) {
+    Move.currentPath = null;
+  }
+
+  if (!mapName) mapName = character.map;
+
+  if (!graph_cache[mapName]) graph_cache[mapName] = initialize_graph(mapName);
+
+  let map = graph_cache[mapName];
+
+  let current_node = map.get(character.real_x, character.real_y);
+  let target_node = map.get(x, y);
+
+  let current_virtual = new VirtualNode(current_node, character.real_x, character.real_y);
+  let target_virtual = new VirtualNode(target_node, x, y);
+
+  Move.currentPath = find_path(current_virtual, target_virtual);
+
+  current_virtual.destroy();
+  target_virtual.destroy();
+
+  Move.target = current_virtual;
+  move(Move.target.x, Move.target.y);
+
+  Sleep(Move, 250);
+
+  Move.pathInterval = setInterval(function() {
+    if (character.moving) return;
+
+    if (!Move.currentPath.length) {
+      clearInterval(Move.pathInterval);
+      Move.done = true;
+      return;
     }
 
-    let map = graph_cache[point.map];
-
-    let current_node = map.get(character.real_x, character.real_y);
-    let target_node = map.get(point.x, point.y);
-
-    let current_virtual = new VirtualNode(current_node, character.real_x, character.real_y);
-    let target_virtual = new VirtualNode(target_node, point.x, point.y);
-
-//    console.time('Find path');
-    let path = find_path(current_virtual, target_virtual);
-    //console.timeEnd('Find path');
-
-    let target = current_virtual;
-    move(target.x, target.y);
-
-    while (path.length) {
-        //await sleep(1000 / 20);
-
-        if (character.moving) continue;
-
-        let pos = new Vec(character);
-
-        // Unexpected movement (probably by the player), so cancel
-        // the path movement.
-        if (!pos.equals(target)) break;
-
-        target = path.shift();
-        move(target.x, target.y);
+    // Unexpected movement (probably by the player), so cancel path movement.
+    if (character.real_x != Move.target.x || character.real_y != Move.target.y) {
+      clearInterval(move_interval);
+      return;
     }
 
-    current_virtual.destroy();
-    target_virtual.destroy();
+    Move.target = Move.currentPath.shift();
+    move(Move.target.x, Move.target.y);
+  });
 }

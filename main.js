@@ -6,18 +6,19 @@ function Main() {
 
   if (!ranOnce) {
     ranOnce = true;
-    initialize_graph(character.map);
-    go_to_point(new Point("halloween", 0, 0));
+    //initialize_graph(character.map);
+    //debugger;
+    //Move(100, 100);
     //InitThetaStar();
     //TSMove(0,0);
     //CreateBuyList();
 		//CreateSellList();
     Respawn();
 
-    DebugException();
 		return;
   }
 
+//  MoveToBoss("fvamprie");
   Run(Upgrade);
   Run(UsePotion);
   Run(Loot);
