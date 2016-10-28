@@ -9,12 +9,12 @@ const graph_cache = {};
 // }
 
 function SmartMove(x, y, mapName) {
-  Move.done = false;
-  Move.dest_x = x;
-  Move.dest_y = y;
+  SmartMove.done = false;
+  SmartMove.dest_x = x;
+  SmartMove.dest_y = y;
 
-  if (Move.currentPath) {
-    Move.currentPath = null;
+  if (SmartMove.currentPath) {
+    SmartMove.currentPath = null;
   }
 
   if (!mapName) mapName = character.map;
@@ -29,32 +29,32 @@ function SmartMove(x, y, mapName) {
   let current_virtual = new VirtualNode(current_node, character.real_x, character.real_y);
   let target_virtual = new VirtualNode(target_node, x, y);
 
-  Move.currentPath = find_path(current_virtual, target_virtual);
+  SmartMove.currentPath = find_path(current_virtual, target_virtual);
 
   current_virtual.destroy();
   target_virtual.destroy();
 
-  Move.target = current_virtual;
-  move(Move.target.x, Move.target.y);
+  SmartMove.target = current_virtual;
+  move(SmartMove.target.x, SmartMove.target.y);
 
-  Sleep(Move, 250);
+  Sleep(SmartMove, 250);
 
-  Move.pathInterval = setInterval(function() {
+  SmartMove.pathInterval = setInterval(function() {
     if (character.moving) return;
 
-    if (!Move.currentPath.length) {
-      clearInterval(Move.pathInterval);
-      Move.done = true;
+    if (!SmartMove.currentPath.length) {
+      clearInterval(SmartMove.pathInterval);
+      SmartMove.done = true;
       return;
     }
 
     // Unexpected movement (probably by the player), so cancel path movement.
-    if (character.real_x != Move.target.x || character.real_y != Move.target.y) {
+    if (character.real_x != SmartMove.target.x || character.real_y != SmartMove.target.y) {
       clearInterval(move_interval);
       return;
     }
 
-    Move.target = Move.currentPath.shift();
-    move(Move.target.x, Move.target.y);
+    SmartMove.target = SmartMove.currentPath.shift();
+    move(SmartMove.target.x, SmartMove.target.y);
   });
 }
