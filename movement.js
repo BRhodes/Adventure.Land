@@ -26,3 +26,13 @@ function FollowName(charName, distance, followMovement) {
   var char=get_player(charName);
   return Follow(char, distance, followMovement);
 }
+
+function Transport(map) {
+  if (Awake(Transport) && character.map != map) {
+    Sleep(Transport, 1000);
+    get_socket().emit("transport", {to: "bank"});
+    return false;
+  } else {
+    return true;
+  }
+}

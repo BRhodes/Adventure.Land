@@ -18,7 +18,8 @@ function Main() {
 		return;
   }
 
-//  MoveToBoss("fvamprie");
+  //Run(Bank);
+  //MoveToBoss("mrpumpkin");
   Run(Upgrade);
   Run(UsePotion);
   Run(Loot);
