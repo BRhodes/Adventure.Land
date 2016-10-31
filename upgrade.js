@@ -3,7 +3,7 @@ function Upgrade() {
   if (upgradeAccessory("intamulet", 0, 50000)) return true;
   if (upgradeAccessory("intamulet", 1, 50000)) return true;
   if (upgradeAccessory("dexamulet", 0, 50000)) return true;
-  if (upgradeAccessory("dexamulet", 1, 50000) return true;
+  if (upgradeAccessory("dexamulet", 1, 50000)) return true;
   if (upgradeAccessory("stramulet", 0, 50000)) return true;
   if (upgradeAccessory("stramulet", 1, 50000)) return true;
   if (upgradeAccessory("hpamulet", 0, 50000)) return true;
