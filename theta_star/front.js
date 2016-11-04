@@ -34,9 +34,7 @@ async function go_to_point(point) {
             await sleep(1000 / 20);
         }
 
-        let pos = new Vec(character);
-        // Unexpected movement (probably by the player), so cancel
-        // the path movement.
-        if (!pos.equals(target)) break;
+        if (character.real_x - target.x > .5 || character.real_y - target.y > .5)
+          break;
     }
 }

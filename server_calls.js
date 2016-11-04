@@ -1,6 +1,9 @@
+var ListServerCalls = [];
+var ServerCallLimit = 155;
+var ServerCallLimitDuration = 4000;
 
 function ServerCallAvailable(limit, funcName, args) {
-  if (!limit) limit = 95;
+  if (!limit) limit = ServerCallLimit;
 
   let currentTime = Date.now();
 
@@ -17,16 +20,9 @@ function ServerCallAdd(expire) {
   ListServerCalls.push(expire);
 }
 
-function Emit(cmd, args) {
-  if (ServerCallAvailable()) {
-    ServerCallAdd(Date.now() + 3000, "Emit", [cmd, args]);
-    get_socket().emit(cmd, args);
-  }
-}
-
 function TryServerCall(call, name, args) {
   if (ServerCallAvailable()) {
-    ServerCallAdd(Date.now() + 3000, name, args)
+    ServerCallAdd(Date.now() + ServerCallLimitDuration, name, args)
     call();
     return true;
   }
@@ -35,8 +31,8 @@ function TryServerCall(call, name, args) {
 
 function Move(x, y) {
   return TryServerCall(() => move(x, y), "Move", [x, y]);
+}
 
-  // if (ServerCallAvailable()) {
-  //   ServerCallAdd(Date.now() + )
-  // }
+function Emit(cmd, args) {
+  return TryServerCall(() => get_socket().emit(cmd, args), "Emit", [cmd, args]);
 }

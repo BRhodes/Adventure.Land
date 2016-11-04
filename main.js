@@ -6,28 +6,16 @@ class Point {
     }
 }
 
-var ListServerCalls = [];
-var LetLoad = true;
 on_interval(Main, runDelay);
-//var notHunting = true;
-
-
 
 async function Main() {
-  if (LetLoad) {
-    LetLoad = false;
-    return;
-  }
-
   InitTime();
-  debugger;
   //RelativeMove(0, 2);
     //debugger;
 
   if (!ranOnce) {
     ranOnce = true;
-    debugger;
-    var p = new Point("halloween", 200, -100);
+    var p = new Point("halloween", 421, -1080);
     await go_to_point(p);
 
 
