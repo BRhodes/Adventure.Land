@@ -1,5 +1,5 @@
 function RelativeMove(relX, relY) {
-  move(character.real_x + relX, character.real_y + relY);
+  Move(character.real_x + relX, character.real_y + relY);
 }
 
 function Follow(char, distance, followMovement) {
@@ -27,12 +27,18 @@ function FollowName(charName, distance, followMovement) {
   return Follow(char, distance, followMovement);
 }
 
-function Transport(map) {
-  if (Awake(Transport) && character.map != map) {
-    Sleep(Transport, 1000);
-    get_socket().emit("transport", {to: "bank"});
-    return false;
-  } else {
-    return true;
+async function Transport(map) {
+  Emit("transport", {to: map});
+  while (character.map != map) {
+    await sleep(20);
   }
+  return;
 }
+// v  if (Awake(Transport) && character.map != map) {
+//     Sleep(Transport, 1000);
+//     get_socket().emit("transport", {to: "bank"});
+//     return false;
+//   } else {
+//     return true;
+//   }
+// }

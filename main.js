@@ -1,11 +1,36 @@
-setInterval(Main, runDelay);
+class Point {
+    constructor(map, x, y) {
+        this.x = x;
+        this.y = y;
+        this.map = map;
+    }
+}
 
-function Main() {
+var ListServerCalls = [];
+var LetLoad = true;
+on_interval(Main, runDelay);
+//var notHunting = true;
+
+
+
+async function Main() {
+  if (LetLoad) {
+    LetLoad = false;
+    return;
+  }
 
   InitTime();
+  debugger;
+  //RelativeMove(0, 2);
+    //debugger;
 
   if (!ranOnce) {
     ranOnce = true;
+    debugger;
+    var p = new Point("halloween", 200, -100);
+    await go_to_point(p);
+
+
     //initialize_graph(character.map);
     //debugger;
     //Move(100, 100);
@@ -18,12 +43,28 @@ function Main() {
 		return;
   }
 
-  //Run(Bank);
-  //MoveToBoss("mrpumpkin");
-  Run(Upgrade);
-  Run(UsePotion);
-  Run(Loot);
-  Run(Tag);
+  //debugger;
+  //await
+  // Run(Bank);
+  // if (Bank.state < 1) {
+  //   if (character.map == "bank") {
+  //     notHunting = true;
+  //   }
+  //   if (notHunting) {
+  //     if (Awake(MoveToBoss) && !SmartMove.done) {
+  //       MoveToBoss("mrpumpkin");
+  //     }) {
+  //       notHunting = false;
+  //     }
+  //   } else {
+  //   //Run(Upgrade);
+  //
+  //     Run(UsePotion);
+  //     Run(Loot);
+  //     Run(Tag);
+  //   }
+  // }
+}
   //use_hp_or_mp();
   //loot();
   //return;
@@ -82,5 +123,3 @@ function Main() {
     //   set_message("Attacking");
     //   attack(target);
     // }
-
-}

@@ -103,3 +103,21 @@ function InfoGraphic() {
   parent.maincode.height=312+12;
   set_message("header<table><tr><td width=\"50%\">XPR: ###</td><td>TTL: HH:MM:DD</td></tr><tr><td>small but</td><td>this will be long</td></tr>");
 }
+
+
+
+
+
+function sleep(timeout) {
+    return new Promise((res) => {
+        setTimeout(res, timeout);
+    });
+}
+
+async function on_interval(task, interval) {
+    /* eslint no-constant-condition: 0 */
+    while (true) {
+        await sleep(interval);
+        await task();
+    }
+}

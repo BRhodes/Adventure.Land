@@ -1,60 +1,42 @@
 const graph_cache = {};
 
-// class Point {
-//     constructor(map, x, y) {
-//         this.x = x;
-//         this.y = y;
-//         this.map = map;
-//     }
-// }
-
-function SmartMove(x, y, mapName) {
-  SmartMove.done = false;
-  SmartMove.dest_x = x;
-  SmartMove.dest_y = y;
-
-  if (SmartMove.currentPath) {
-    SmartMove.currentPath = null;
-  }
-
-  if (!mapName) mapName = character.map;
-
-  if (!graph_cache[mapName]) graph_cache[mapName] = initialize_graph(mapName);
-
-  let map = graph_cache[mapName];
-
-  let current_node = map.get(character.real_x, character.real_y);
-  let target_node = map.get(x, y);
-
-  let current_virtual = new VirtualNode(current_node, character.real_x, character.real_y);
-  let target_virtual = new VirtualNode(target_node, x, y);
-
-  SmartMove.currentPath = find_path(current_virtual, target_virtual);
-
-  current_virtual.destroy();
-  target_virtual.destroy();
-
-  SmartMove.target = current_virtual;
-  move(SmartMove.target.x, SmartMove.target.y);
-
-  Sleep(SmartMove, 250);
-
-  SmartMove.pathInterval = setInterval(function() {
-    if (character.moving) return;
-
-    if (!SmartMove.currentPath.length) {
-      clearInterval(SmartMove.pathInterval);
-      SmartMove.done = true;
-      return;
+async function go_to_point(point) {
+    if (character.map != point.map) {
+      await Transport(point.map);
     }
 
-    // Unexpected movement (probably by the player), so cancel path movement.
-    if (character.real_x != SmartMove.target.x || character.real_y != SmartMove.target.y) {
-      clearInterval(move_interval);
-      return;
+    if (!graph_cache[point.map]) {
+        console.time('Initialize Graph');
+        graph_cache[point.map] = initialize_graph(point.map);
+        console.timeEnd('Initialize Graph');
     }
 
-    SmartMove.target = SmartMove.currentPath.shift();
-    move(SmartMove.target.x, SmartMove.target.y);
-  });
+    let map = graph_cache[point.map];
+
+    let current_node = map.get(character.real_x, character.real_y);
+    let target_node = map.get(point.x, point.y);
+
+    let current_virtual = new VirtualNode(current_node, character.real_x, character.real_y);
+    let target_virtual = new VirtualNode(target_node, point.x, point.y);
+
+    console.time('Find path');
+    let path = find_path(current_virtual, target_virtual);
+    console.timeEnd('Find path');
+
+    current_virtual.destroy();
+    target_virtual.destroy();
+
+    while (path.length) {
+        let target = path.shift();
+        move(target.x, target.y);
+
+        while (character.moving) {
+            await sleep(1000 / 20);
+        }
+
+        let pos = new Vec(character);
+        // Unexpected movement (probably by the player), so cancel
+        // the path movement.
+        if (!pos.equals(target)) break;
+    }
 }
