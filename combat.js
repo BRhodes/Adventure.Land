@@ -1,49 +1,49 @@
-// Attack a monster only if no targets
-function Tag() {
-  if (!Tag.Follow) Tag.Follow = {};
-  if (!Tag.Attack) Tag.Attack = {};
-  	// max_att - max attack
-  	// min_xp - min XP
-    // m_type:
-  	// target: Only return monsters that target this "name" or player object
-  	// no_target: Only pick monsters that don't have any target
-  	var min_d=999999,target=null;
-	var tagged = 0;
-	var tagmin_d=999999,tagtarget=null;
-  	//if(!args) args={};
-  	//if(args && args.target && args.target.name) args.target=args.target.name;
-
-  	for(id in parent.entities)
-  	{
-  		var current=parent.entities[id];
-  		if(current.type!="monster" || current.dead) continue;
-      if(current.mtype=="ghost") continue;
-      if(current.mtype=="gscorpion") continue;
-      if(current.mtype=="mrpumpkin") continue;
-      //if(args.mtype && current.mtype != args.mtype) continue;
-  		//if(args.target&& current.target!=args.target) continue;
-  		if(current.target && character.max_hp - character.hp < 300) {
-			var tagc_dist=parent.distance(character,current);
-  			if(tagc_dist<tagmin_d) tagmin_d=tagc_dist,tagtarget=current;
-			tagged = tagged + 1;
-        continue;
-      }
-
-  		var c_dist=parent.distance(character,current);
-  		if(c_dist<min_d) min_d=c_dist,target=current;
-  	}
-	if (tagged > 3) target=tagtarget;
-
-    if (Awake(Tag.Follow) && !in_attack_range(target)) {
-      Follow(target, character.range);
-      Sleep(Tag.Follow, 100);
-    }
-
-  	if (Awake(Tag.Attack) && can_attack(target)) {
-      attack(target);
-      Sleep(Tag.Attack, 700);
-    };
-}
+// // Attack a monster only if no targets
+// function Tag() {
+//   if (!Tag.Follow) Tag.Follow = {};
+//   if (!Tag.Attack) Tag.Attack = {};
+//   	// max_att - max attack
+//   	// min_xp - min XP
+//     // m_type:
+//   	// target: Only return monsters that target this "name" or player object
+//   	// no_target: Only pick monsters that don't have any target
+//   	var min_d=999999,target=null;
+// 	var tagged = 0;
+// 	var tagmin_d=999999,tagtarget=null;
+//   	//if(!args) args={};
+//   	//if(args && args.target && args.target.name) args.target=args.target.name;
+//
+//   	for(id in parent.entities)
+//   	{
+//   		var current=parent.entities[id];
+//   		if(current.type!="monster" || current.dead) continue;
+//       if(current.mtype=="ghost") continue;
+//       if(current.mtype=="gscorpion") continue;
+//       if(current.mtype=="mrpumpkin") continue;
+//       //if(args.mtype && current.mtype != args.mtype) continue;
+//   		//if(args.target&& current.target!=args.target) continue;
+//   		if(current.target && character.max_hp - character.hp < 300) {
+// 			var tagc_dist=parent.distance(character,current);
+//   			if(tagc_dist<tagmin_d) tagmin_d=tagc_dist,tagtarget=current;
+// 			tagged = tagged + 1;
+//         continue;
+//       }
+//
+//   		var c_dist=parent.distance(character,current);
+//   		if(c_dist<min_d) min_d=c_dist,target=current;
+//   	}
+// 	if (tagged > 3) target=tagtarget;
+//
+//     if (Awake(Tag.Follow) && !in_attack_range(target)) {
+//       Follow(target, character.range);
+//       Sleep(Tag.Follow, 100);
+//     }
+//
+//   	if (Awake(Tag.Attack) && can_attack(target)) {
+//       attack(target);
+//       Sleep(Tag.Attack, 700);
+//     };
+// }
 
 async function FarmTillBoss(bossName, grindMobName) {
   // while no boss in sight
