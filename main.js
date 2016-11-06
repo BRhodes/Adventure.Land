@@ -8,6 +8,8 @@ class Point {
 
 on_interval(Main, runDelay);
 
+setInterval(function() { use_hp_or_mp(); }, 1000);
+
 async function Main() {
   InitTime();
   //RelativeMove(0, 2);
@@ -15,6 +17,10 @@ async function Main() {
 
   if (!ranOnce) {
     ranOnce = true;
+    var p;
+    p = new Point("main", 1157, 446);
+    await go_to_point(p);
+    await FarmTillBoss("phoenix", "dknight2");
     var p = new Point("halloween", 421, -1080);
     await go_to_point(p);
 
