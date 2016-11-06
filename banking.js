@@ -1,41 +1,71 @@
-function Bank() {
-  set_message(Bank.state);
-  if (!Bank.state && InvCount() > 5) {
-    Bank.state = 1;
-    return;
-  }
-
-  switch (Bank.state) {
-    case 1:
-      if (Transport("bank")) Bank.state = 2;
-      break;
-    case 2:
-      DepositInv();
-      break;
-    case 3:
-      Bank.state = 0;
-      //WithdrawCrafting();
-      break;
-
-    default:
-
-  }
-  // set
+async function Bank() {
+  await Transport("bank", true);
+  await DepositInv();
+  //await Sort();
 }
 
-function DepositInv() {
-  var invItem;
-  for (var inv in character.items) {
-    if (character.items[inv]) {
-      if (DepositItem(inv)) {
-        return;
-      } else {
-        Bank.state = -1;
-        return;
-      }
+
+
+// async function Sort() {
+//   let bank = [];
+//   for (let i = 0; i < 42; i++) {
+//     bank.push([character.user["items0"][i], "items0", i]);
+//   }
+//   for (let i = 0; i < 42; i++) {
+//     bank.push([character.user["items1"][i], "items1", i]);
+//   }
+//
+//   while (swapped) {
+//     for (let i = 0; i < 84; i++) {
+//
+//     }
+//   }
+//
+// }
+
+
+async function DepositInv() {
+  var invSlot;
+  var bankName;
+  var bankSlot;
+  var finished = false;
+
+  invSlot = 0;
+  bankName = "items0";
+  bankSlot = 0;
+
+  while (!finished) {
+    while (!character.items[invSlot] && invSlot < 42) invSlot++;
+    while (character.user[bankName][bankSlot] && bankSlot < 42) bankSlot++;
+    if (invSlot < 42 && bankSlot < 42) {
+      await SwapBank(invSlot, bankSlot, bankName);
+      invSlot++;
+      bankSlot++;
+    } else {
+      finished = true;
     }
   }
-  Bank.state = 3;
+  finished = false;
+  bankName = "items1";
+  bankSlot = 0;
+  while (!finished) {
+    while (!character.items[invSlot] && invSlot < 42) invSlot++;
+    while (character.user[bankName][bankSlot] && bankSlot < 42) bankSlot++;
+    if (invSlot < 42 && bankSlot < 42) {
+      await SwapBank(invSlot, bankSlot, bankName);
+      invSlot++;
+      bankSlot++;
+    } else {
+      finished = true;
+    }
+  }
+
+  // for (var inv in character.items) {
+  //   if (character.items[inv]) {
+  //     if (!DepositItem(inv)) break; //sleep(50);
+  //     //else break;
+  //   }
+  // }
 }
 
 function DepositItem(inv) {
@@ -43,8 +73,26 @@ function DepositItem(inv) {
        || DepositItemInto("items1", inv));
 }
 
+
+// function DepositInv() {
+//   var invItem;
+//   for (var inv in character.items) {
+//     if (character.items[inv]) {
+//       if (DepositItem(inv)) {
+//         return;
+//       } else {
+//         Bank.state = -1;
+//         return;
+//       }
+//     }
+//   }
+//   Bank.state = 3;
+// }
+
+
+
 function DepositItemInto(bankName, inv) {
-  Sleep(Bank, 1000);
+  //Sleep(Bank, 1000);
 
   var bankSlot = null;
   for (let i in character.user[bankName]) {
@@ -63,8 +111,10 @@ function DepositItemInto(bankName, inv) {
   //           ["bank",{"operation":"swap","inv":31,"str":38,"pack":"items0"}]
 }
 
-function SwapBank(inv, bankSlot, bankName) {
-  get_socket().emit("bank", {operation: "swap", inv:inv, str: bankSlot, pack: bankName});
+async function SwapBank(inv, bankSlot, bankName) {
+  debugger;
+  await ForceServerCall(() => Emit("bank", {operation: "swap", inv:inv, str: bankSlot, pack: bankName}));
+  //get_socket().emit();
 }
 
 

@@ -18,11 +18,14 @@ async function Main() {
   if (!ranOnce) {
     ranOnce = true;
     var p;
-    p = new Point("main", 1157, 446);
+
+    await Bank();
+    await sleep(15000);
+    p = new Point("main", 1100, 322); // darknights
     await go_to_point(p);
     await FarmTillBoss("phoenix", "dknight2");
-    var p = new Point("halloween", 421, -1080);
-    await go_to_point(p);
+    //var p = new Point("halloween", 421, -1080); ghosts
+    //await go_to_point(p);
 
 
     //initialize_graph(character.map);

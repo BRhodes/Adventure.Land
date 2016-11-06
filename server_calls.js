@@ -29,6 +29,11 @@ function TryServerCall(call, name, args) {
   return false;
 }
 
+async function ForceServerCall(func) {
+  while (!func())
+    await sleep(25);
+}
+
 function Move(x, y) {
   return TryServerCall(() => move(x, y), "Move", [x, y]);
 }

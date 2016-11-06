@@ -27,8 +27,10 @@ function FollowName(charName, distance, followMovement) {
   return Follow(char, distance, followMovement);
 }
 
-async function Transport(map) {
-  Emit("transport", {to: map});
+async function Transport(map, checkMap) {
+  if (!checkMap) checkMap = false;
+  if (!checkMap || character.map != map)
+    Emit("transport", {to: map});
   while (character.map != map) {
     await sleep(20);
   }
