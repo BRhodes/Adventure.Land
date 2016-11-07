@@ -1,20 +1,20 @@
-roles["warrior"]["dps"] = {};
+roles["ranger"]["dps"] = {};
 
-roles["warrior"]["dps"].amulet = [
-  ["stramulet", 10],
-  ["stramulet",  9],
-  ["stramulet",  8],
-  ["stramulet",  7],
-  ["stramulet",  6],
-  ["stramulet",  5],
-  ["stramulet",  4],
-  ["stramulet",  3],
-  ["stramulet",  2],
-  ["stramulet",  1],
-  ["stramulet",  0],
+roles["ranger"]["dps"].amulet = [
+  ["dexamulet", 10],
+  ["dexamulet",  9],
+  ["dexamulet",  8],
+  ["dexamulet",  7],
+  ["dexamulet",  6],
+  ["dexamulet",  5],
+  ["dexamulet",  4],
+  ["dexamulet",  3],
+  ["dexamulet",  2],
+  ["dexamulet",  1],
+  ["dexamulet",  0],
 ]
 
-roles["warrior"]["dps"].belt = [
+roles["ranger"]["dps"].belt = [
   ["hpbelt", 10],
   ["hpbelt",  9],
   ["hpbelt",  8],
@@ -28,7 +28,7 @@ roles["warrior"]["dps"].belt = [
   ["hpbelt",  0],
 ]
 
-roles["warrior"]["dps"].chest = [
+roles["ranger"]["dps"].chest = [
   ["xarmor", 10],
   ["harmor", 10],
   ["mcape", 10],
@@ -86,35 +86,35 @@ roles["warrior"]["dps"].chest = [
   ["coat",  0],
 ]
 
-roles["warrior"]["dps"].earring1 = [
-  ["strearring", 10],
-  ["strearring",  9],
-  ["strearring",  8],
-  ["strearring",  7],
-  ["strearring",  6],
-  ["strearring",  5],
-  ["strearring",  4],
-  ["strearring",  3],
-  ["strearring",  2],
-  ["strearring",  1],
-  ["strearring",  0],
+roles["ranger"]["dps"].earring1 = [
+  ["dexearring", 10],
+  ["dexearring",  9],
+  ["dexearring",  8],
+  ["dexearring",  7],
+  ["dexearring",  6],
+  ["dexearring",  5],
+  ["dexearring",  4],
+  ["dexearring",  3],
+  ["dexearring",  2],
+  ["dexearring",  1],
+  ["dexearring",  0],
 ]
 
-roles["warrior"]["dps"].earring2 = [
-  ["strearring", 10],
-  ["strearring",  9],
-  ["strearring",  8],
-  ["strearring",  7],
-  ["strearring",  6],
-  ["strearring",  5],
-  ["strearring",  4],
-  ["strearring",  3],
-  ["strearring",  2],
-  ["strearring",  1],
-  ["strearring",  0],
+roles["ranger"]["dps"].earring2 = [
+  ["dexearring", 10],
+  ["dexearring",  9],
+  ["dexearring",  8],
+  ["dexearring",  7],
+  ["dexearring",  6],
+  ["dexearring",  5],
+  ["dexearring",  4],
+  ["dexearring",  3],
+  ["dexearring",  2],
+  ["dexearring",  1],
+  ["dexearring",  0],
 ]
 
-roles["warrior"]["dps"].gloves = [
+roles["ranger"]["dps"].gloves = [
   ["xgloves", 10],
   ["hgloves", 10],
   ["gloves1", 10],
@@ -161,7 +161,7 @@ roles["warrior"]["dps"].gloves = [
   ["gloves",   0],
 ]
 
-roles["warrior"]["dps"].helmet = [
+roles["ranger"]["dps"].helmet = [
   ["xhelmet", 10],
   ["hhelmet", 10],
   ["phelmet", 10],
@@ -219,57 +219,35 @@ roles["warrior"]["dps"].helmet = [
   ["helmet",  0],
 ]
 
-roles["warrior"]["dps"].mainhand = [
-  ["fblade", 10],
-  ["blade",  10],
-  ["fblade",  9],
-  ["blade",   9],
-  ["fblade",  8],
-  ["blade",   8],
-  ["fblade",  7],
-  ["blade",   7],
-  ["fblade",  6],
-  ["blade",   6],
-  ["fblade",  5],
-  ["blade",   5],
-  ["fblade",  4],
-  ["blade",   4],
-  ["fblade",  3],
-  ["blade",   3],
-  ["fblade",  2],
-  ["blade",   2],
-  ["fblade",  1],
-  ["blade",   1],
-  ["fblade",  0],
-  ["blade",   0],
+roles["ranger"]["dps"].mainhand = [
+  ["bow", 10],
+  ["bow",  9],
+  ["bow",  8],
+  ["bow",  7],
+  ["bow",  6],
+  ["bow",  5],
+  ["bow",  4],
+  ["bow",  3],
+  ["bow",  2],
+  ["bow",  1],
+  ["bow",  0],
 ]
 
-roles["warrior"]["dps"].offhand = [
-  ["fblade", 10],
-  ["blade",  10],
-  ["fblade",  9],
-  ["blade",   9],
-  ["fblade",  8],
-  ["blade",   8],
-  ["fblade",  7],
-  ["blade",   7],
-  ["fblade",  6],
-  ["blade",   6],
-  ["fblade",  5],
-  ["blade",   5],
-  ["fblade",  4],
-  ["blade",   4],
-  ["fblade",  3],
-  ["blade",   3],
-  ["fblade",  2],
-  ["blade",   2],
-  ["fblade",  1],
-  ["blade",   1],
-  ["fblade",  0],
-  ["blade",   0],
+roles["ranger"]["dps"].offhand = [
+  ["quiver", 10],
+  ["quiver",  9],
+  ["quiver",  8],
+  ["quiver",  7],
+  ["quiver",  6],
+  ["quiver",  5],
+  ["quiver",  4],
+  ["quiver",  3],
+  ["quiver",  2],
+  ["quiver",  1],
+  ["quiver",  0],
 ]
 
-roles["warrior"]["dps"].pants = [
+roles["ranger"]["dps"].pants = [
   ["xpants", 10],
   ["hpants", 10],
   ["pants1", 10],
@@ -316,7 +294,7 @@ roles["warrior"]["dps"].pants = [
   ["pants",   0],
 ]
 
-roles["warrior"]["dps"].ring1 = [
+roles["ranger"]["dps"].ring1 = [
   ["ringsj", 10],
   ["ringsj",  9],
   ["ringsj",  8],
@@ -330,7 +308,7 @@ roles["warrior"]["dps"].ring1 = [
   ["ringsj",  0],
 ]
 
-roles["warrior"]["dps"].ring2 = [
+roles["ranger"]["dps"].ring2 = [
   ["ringsj", 10],
   ["ringsj",  9],
   ["ringsj",  8],
@@ -344,7 +322,7 @@ roles["warrior"]["dps"].ring2 = [
   ["ringsj",  0],
 ]
 
-roles["warrior"]["dps"].shoes = [
+roles["ranger"]["dps"].shoes = [
   ["xboots", 10],
   ["hboots", 10],
   ["shoes1", 10],
