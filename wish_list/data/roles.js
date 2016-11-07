@@ -1,0 +1,2 @@
+var roles = {};
+roles["warrior"] = {};
