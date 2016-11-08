@@ -220,53 +220,75 @@ roles["warrior"]["dps"].helmet = [
 ]
 
 roles["warrior"]["dps"].mainhand = [
-  ["fblade", 10],
-  ["blade",  10],
-  ["fblade",  9],
-  ["blade",   9],
-  ["fblade",  8],
-  ["blade",   8],
-  ["fblade",  7],
-  ["blade",   7],
-  ["fblade",  6],
-  ["blade",   6],
-  ["fblade",  5],
-  ["blade",   5],
-  ["fblade",  4],
-  ["blade",   4],
-  ["fblade",  3],
-  ["blade",   3],
-  ["fblade",  2],
-  ["blade",   2],
-  ["fblade",  1],
-  ["blade",   1],
-  ["fblade",  0],
-  ["blade",   0],
+  ["spear",     10], // 84.534
+  ["fireblade", 10], // 80
+  ["blade",     10], // 70
+  ["spear",      9], // 68.808
+  ["fireblade",  9], // 66
+  ["blade",      9], // 58
+  ["spear",      8], // 57.61600000000001
+  ["fireblade",  8], // 57
+  ["fireblade",  7], // 51
+  ["spear",      7], // 50.232000000000006
+  ["blade",      8], // 50
+  ["fireblade",  6], // 45
+  ["spear",      6], // 44.28
+  ["blade",      7], // 44
+  ["fireblade",  5], // 41
+  ["blade",      6], // 39
+  ["spear",      5], // 38.52
+  ["fireblade",  4], // 36
+  ["blade",      5], // 35
+  ["spear",      4], // 33.92
+  ["fireblade",  3], // 32
+  ["blade",      4], // 31
+  ["spear",      3], // 29.400000000000002
+  ["fireblade",  2], // 27
+  ["blade",      3], // 27
+  ["spear",      2], // 24.96
+  ["fireblade",  1], // 23
+  ["blade",      2], // 23
+  ["spear",      1], // 19.57
+  ["blade",      1], // 19
+  ["fireblade",  0], // 18
+  ["spear",      0], // 15.3
+  ["blade",      0], // 15
 ]
 
 roles["warrior"]["dps"].offhand = [
-  ["fblade", 10],
-  ["blade",  10],
-  ["fblade",  9],
-  ["blade",   9],
-  ["fblade",  8],
-  ["blade",   8],
-  ["fblade",  7],
-  ["blade",   7],
-  ["fblade",  6],
-  ["blade",   6],
-  ["fblade",  5],
-  ["blade",   5],
-  ["fblade",  4],
-  ["blade",   4],
-  ["fblade",  3],
-  ["blade",   3],
-  ["fblade",  2],
-  ["blade",   2],
-  ["fblade",  1],
-  ["blade",   1],
-  ["fblade",  0],
-  ["blade",   0],
+  ["spear",     10], // 84.534
+  ["fireblade", 10], // 80
+  ["blade",     10], // 70
+  ["spear",      9], // 68.808
+  ["fireblade",  9], // 66
+  ["blade",      9], // 58
+  ["spear",      8], // 57.61600000000001
+  ["fireblade",  8], // 57
+  ["fireblade",  7], // 51
+  ["spear",      7], // 50.232000000000006
+  ["blade",      8], // 50
+  ["fireblade",  6], // 45
+  ["spear",      6], // 44.28
+  ["blade",      7], // 44
+  ["fireblade",  5], // 41
+  ["blade",      6], // 39
+  ["spear",      5], // 38.52
+  ["fireblade",  4], // 36
+  ["blade",      5], // 35
+  ["spear",      4], // 33.92
+  ["fireblade",  3], // 32
+  ["blade",      4], // 31
+  ["spear",      3], // 29.400000000000002
+  ["fireblade",  2], // 27
+  ["blade",      3], // 27
+  ["spear",      2], // 24.96
+  ["fireblade",  1], // 23
+  ["blade",      2], // 23
+  ["spear",      1], // 19.57
+  ["blade",      1], // 19
+  ["fireblade",  0], // 18
+  ["spear",      0], // 15.3
+  ["blade",      0], // 15
 ]
 
 roles["warrior"]["dps"].pants = [
