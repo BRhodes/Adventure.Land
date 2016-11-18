@@ -10,39 +10,92 @@
 class WishList {
   constructor() {
     this.list = {};
+    this.roles = [];
   }
 
-
-  AddItem(itemName, level) {
+  SetItem(itemName, level, slot) {
     if (!this.list[itemName] // item not in list yet
-      || this.list[itemName] > level) { // item lower level that item in list
-      this.list[itemName] = level;
+      || this.list[itemName][0] > level) { // item lower level that item in list
+      this.list[itemName] = [level, slot];
     }
   }
 
-  AddAllItems(list, slot) {
+  SetAllItems(list, slot) {
     for (let item in list) {
       if (character.slots[slot] && character.slots[slot].name == list[item][0] && character.slots[slot].level == list[item][1])
         break;
-      this.AddItem(list[item][0], list[item][1]);
+      this.SetItem(list[item][0], list[item][1], slot);
     }
   }
 
-  AddAllSlots(slots) {
+  SetAllSlots(slots) {
     for (let slot in slots) {
-      this.AddAllItems(slots[slot], slot);
+      this.SetAllItems(slots[slot], slot);
     }
   }
 
-  AddRoleList(roleClass, roleType) {
-    this.AddAllSlots(roles[roleClass][roleType]);
+  SetRoleList(className, roleType) {
+    this.SetAllSlots(roles[className][roleType]);
+  }
+
+  AddRoleList(className, roleType) {
+    this.roles.push([className, roleType]);
+    this.SetRoleList(className, roleType);
+  }
+
+  RefreshList() {
+    this.list = {};
+    for (let r in this.roles) {
+      let role = this.roles[r];
+      this.SetRoleList(role[0], role[1]);
+    }
+  }
+
+  IsUpgrade(item) {
+    var equipped;
+    var upgrade;
+    var slot;
+
+    if (!item) {
+      return [false, equipped, slot];
+    }
+
+    if (this.list[item.name] && this.list[item.name][0] <= item.level) {
+      return [true, equipped, this.list[item.name][1]];
+    } else {
+      return [false, equipped, slot];
+    }
+
+
   }
 }
 
-debugger;
 var wishlist = new WishList();
-wishlist.AddRoleList("warrior", "dps");
-debugger;
+
+async function test() {
+  wishlist.AddRoleList("warrior", "dps");
+  for (let i in character.items)
+  {
+    if (!character.items[i]) continue;
+    if (wishlist.IsUpgrade(character.items[i])[0]) {
+      var a = character.items[i];
+      var b = wishlist.IsUpgrade(character.items[i]);
+      console.log("Yes: " + a.name + " - " + a.level)
+      debugger;
+      Emit("unequip", {slot: b[1]});
+      upgrade(i, 3);
+      Emit("equip", {num: i});
+      await sleep(1000);
+      wishlist.RefreshList();
+      //wishlist.AddRoleList("warrior", "dps");
+    } else {
+      var a = character.items[i];
+      console.log("No: " + a.name + " - " + a.level)
+    }
+  }
+  debugger;
+}
+test();
 
 
 

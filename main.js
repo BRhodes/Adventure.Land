@@ -14,7 +14,7 @@ async function Main() {
   InitTime();
   //RelativeMove(0, 2);
     //debugger;
-
+    ranOnce = true;
   if (!ranOnce) {
     ranOnce = true;
     var p;
