@@ -9,22 +9,23 @@ function PartyInvite(characterName) {
 }
 
 function PartyManagement() {
-	if (character.name == partyLeader) {
+	//if (character.name == partyLeader) {
 		if (PartyInvite("Vehnato")
 		   ||PartyInvite("Vehnifer")
-		   ||PartyInvite("Vehn")
+		   ||PartyInvite("Vehnelope")
 		   ||PartyInvite("Valazi")
-		   ||PartyInvite("Dinasis")) return true;
-	} else {
-		if (!character.party) {
-			get_socket().emit("party", {event:"accept", name:partyLeader});
-			return true;
-		}
-		if (character.party != partyLeader) {
-			get_socket().emit("party", {event:"leave"});
-			return true;
-		}
-	}
+		   ||PartyInvite("Vehniferr")
+		 	 ||PartyInvite("Vehnjamin")) return true;
+	// } else {
+	// 	if (!character.party) {
+	// 		get_socket().emit("party", {event:"accept", name:partyLeader});
+	// 		return true;
+	// 	}
+	// 	if (character.party != partyLeader) {
+	// 		get_socket().emit("party", {event:"leave"});
+	// 		return true;
+	// 	}
+	// }
 
 	return false;
 }
